@@ -10,16 +10,18 @@
       "database": "geochat",
       "user": "postgres",
       "password": "postgres"
-    }, // <-- COMA AÑADIDA AQUÍ
-    "ghcr.io/devcontainers/features/git": {
-      "version": "latest",
-      "lfs": "true"
-    } // <-- NO SE NECESITA COMA AQUÍ, YA QUE ES EL ÚLTIMO ELEMENTO DE "features"
-  }, // <-- COMA AÑADIDA AQUÍ
+    }
+  }, // Eliminamos la característica 'git' para evitar el conflicto
   "forwardPorts": [8080, 5173, 5432],
   "postCreateCommand": [
+    // Instalación de dependencias de Go y Node
     "cd Backend && go mod tidy",
-    "cd Frontend && npm install"
+    "cd Frontend && npm install",
+
+    // Instalación manual de Git LFS (usando 'apk' ya que 'apt-get' falló)
+    "sudo apk update",
+    "sudo apk add git-lfs",
+    "git lfs install"
   ],
   "customizations": {
     "vscode": {
