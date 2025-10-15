@@ -10,13 +10,17 @@
       "database": "geochat",
       "user": "postgres",
       "password": "postgres"
-    }
-  },
+    }, // <-- COMA AÑADIDA AQUÍ
+    "ghcr.io/devcontainers/features/git": {
+      "version": "latest",
+      "lfs": "true"
+    } // <-- NO SE NECESITA COMA AQUÍ, YA QUE ES EL ÚLTIMO ELEMENTO DE "features"
+  }, // <-- COMA AÑADIDA AQUÍ
   "forwardPorts": [8080, 5173, 5432],
-"postCreateCommand": [
+  "postCreateCommand": [
     "cd Backend && go mod tidy",
     "cd Frontend && npm install"
-],
+  ],
   "customizations": {
     "vscode": {
       "extensions": [
@@ -29,4 +33,3 @@
   },
   "remoteUser": "vscode"
 }
-
