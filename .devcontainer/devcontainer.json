@@ -5,19 +5,12 @@
     "ghcr.io/devcontainers/features/node:1": {
       "version": "22"
     }
-    // NOTA: Eliminamos la feature de PostgreSQL porque causó el error de "could not be processed".
   }, 
   "forwardPorts": [8080, 5173, 5432],
   "postCreateCommand": [
-    // 1. INSTALACIÓN DE HERRAMIENTAS CRÍTICAS (Git LFS)
-    "sudo apk update",
-    "sudo apk add git-lfs",
-    "git lfs install",
-
-    // 2. INSTALACIÓN DE DEPENDENCIAS DE APLICACIÓN
+    // Solo comandos de la aplicación que se ejecutan desde la raíz del workspace
     "cd Backend && go mod tidy",
     "cd Frontend && npm install"
-    // NOTA: La configuración de PostgreSQL deberá hacerse manualmente o en un Docker Compose
   ],
   "customizations": {
     "vscode": {
