@@ -13,7 +13,10 @@
     }
   },
   "forwardPorts": [8080, 5173, 5432],
-  "postCreateCommand": "cd Backend && go mod tidy && cd ../Frontend && npm install",
+"postCreateCommand": [
+    "cd Backend && go mod tidy",
+    "cd Frontend && npm install"
+],
   "customizations": {
     "vscode": {
       "extensions": [
