@@ -13,7 +13,9 @@ services:
       - 5173:5173
     depends_on:
       - db
-    # El comando de inicio ha sido movido a 'postStartCommand' en .devcontainer/devcontainer.json para mayor estabilidad.
+    # AÑADIDO: Este comando mantiene el contenedor 'app' vivo 
+    # para que Codespaces pueda adjuntarse a él.
+    command: sleep infinity
     
   # Servicio de PostgreSQL (Base de datos)
   db:
