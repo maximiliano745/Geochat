@@ -1,17 +1,23 @@
 {
-  "name": "GeoChat Dev Container",
-  "image": "mcr.microsoft.com/devcontainers/go:1.22",
+  "name": "GeoChat Dev Container with Compose",
+  "dockerComposeFile": "../docker-compose.yml", // Hace referencia al archivo en la raíz
+  "service": "app",                           // Especifica el servicio de la app como el contenedor principal
+  "workspaceFolder": "/workspaces/Geochat",
+  
+  // Las features y comandos se mueven a la configuración de Codespaces
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
       "version": "22"
     }
-  }, 
+  },
   "forwardPorts": [8080, 5173, 5432],
+  
+  // Estos comandos se ejecutan en el contenedor 'app' (tu entorno de desarrollo)
   "postCreateCommand": [
-    // Solo comandos de la aplicación que se ejecutan desde la raíz del workspace
     "cd Backend && go mod tidy",
     "cd Frontend && npm install"
   ],
+  
   "customizations": {
     "vscode": {
       "extensions": [

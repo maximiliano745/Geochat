@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  # Servicio de tu aplicación (se ejecuta dentro del mismo Codespace)
+  app:
+    # Usamos la imagen ya construida por Codespaces (el contenedor de desarrollo)
+    image: ${DEVCONTAINER_IMAGE} 
+    volumes:
+      - ..:/workspaces/Geochat:cached
+    # Puertos para Go (8080) y Vue (5173), mapeados al host
+    ports:
+      - 8080:8080
+      - 5173:5173
+    depends_on:
+      - db
+    # Comando para iniciar la aplicación (ajusta según tus scripts de inicio)
+    command: bash -c "go run Backend/main.go & npm run dev --prefix Frontend"
+
+  # Servicio de PostgreSQL
+  db:
+    image: postgres:15-alpine # Imagen ligera y estable
+    restart: always
+    environment:
+      # Las variables de entorno que tu aplicación usará para conectarse
+      POSTGRES_DB: geochat
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      # Persistencia de datos para que no se pierdan al reconstruir
+      - postgres_data:/var/lib/postgresql/data/
+
+volumes:
+  postgres_data:
