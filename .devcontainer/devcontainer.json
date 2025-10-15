@@ -4,24 +4,20 @@
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
       "version": "22"
-    },
-    "ghcr.io/devcontainers/features/postgres:1": {
-      "version": "15",
-      "database": "geochat",
-      "user": "postgres",
-      "password": "postgres"
     }
-  }, // Eliminamos la característica 'git' para evitar el conflicto
+    // NOTA: Eliminamos la feature de PostgreSQL porque causó el error de "could not be processed".
+  }, 
   "forwardPorts": [8080, 5173, 5432],
   "postCreateCommand": [
-    // Instalación de dependencias de Go y Node
-    "cd Backend && go mod tidy",
-    "cd Frontend && npm install",
-
-    // Instalación manual de Git LFS (usando 'apk' ya que 'apt-get' falló)
+    // 1. INSTALACIÓN DE HERRAMIENTAS CRÍTICAS (Git LFS)
     "sudo apk update",
     "sudo apk add git-lfs",
-    "git lfs install"
+    "git lfs install",
+
+    // 2. INSTALACIÓN DE DEPENDENCIAS DE APLICACIÓN
+    "cd Backend && go mod tidy",
+    "cd Frontend && npm install"
+    // NOTA: La configuración de PostgreSQL deberá hacerse manualmente o en un Docker Compose
   ],
   "customizations": {
     "vscode": {
