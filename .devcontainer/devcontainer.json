@@ -1,0 +1,28 @@
+{
+  "name": "GeoChat Dev Container",
+  "image": "mcr.microsoft.com/devcontainers/go:1.22",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22"              // 👉 instala Node.js 22 + npm
+    },
+    "ghcr.io/devcontainers/features/postgres:1": {
+      "version": "15",             // 👉 instala y levanta PostgreSQL 15
+      "database": "geochat",
+      "user": "postgres",
+      "password": "postgres"
+    }
+  },
+  "forwardPorts": [8080, 5173, 5432],
+  "postCreateCommand": "cd Backend && go mod tidy && cd ../Frontend && npm install",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.Go",               // Soporte para Go
+        "ms-azuretools.vscode-docker",
+        "Vue.volar",               // Soporte para Vue 3
+        "esbenp.prettier-vscode"   // Formateo automático de JS/Vue
+      ]
+    }
+  },
+  "remoteUser": "vscode"
+}
