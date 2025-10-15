@@ -3,7 +3,6 @@ version: '3.8'
 services:
   # Servicio principal de la aplicación (entorno de desarrollo)
   app:
-    # **Ajuste clave:** Usamos la imagen específica de Go 1.23 para coincidir con la configuración del .devcontainer/devcontainer.json
     image: mcr.microsoft.com/devcontainers/go:1.23 
     volumes:
       # Mapea todo el repositorio al contenedor
@@ -14,8 +13,7 @@ services:
       - 5173:5173
     depends_on:
       - db
-    # Comando para iniciar la aplicación (ejecuta Go y Node en segundo plano)
-    command: bash -c "go run Backend/main.go & npm run dev --prefix Frontend"
+    # El comando de inicio ha sido movido a 'postStartCommand' en .devcontainer/devcontainer.json para mayor estabilidad.
     
   # Servicio de PostgreSQL (Base de datos)
   db:
