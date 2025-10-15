@@ -1,23 +1,29 @@
 {
   "name": "GeoChat Dev Container with Compose",
-  "dockerComposeFile": "../docker-compose.yml", // Hace referencia al archivo en la raíz
-  "service": "app",                           // Especifica el servicio de la app como el contenedor principal
+  "dockerComposeFile": "../docker-compose.yml", // Referencia al archivo de configuración de Docker Compose
+  "service": "app", // Especifica el servicio 'app' como el contenedor principal de desarrollo
   "workspaceFolder": "/workspaces/Geochat",
   
-  // Las features y comandos se mueven a la configuración de Codespaces
+  // Instala la Feature de Node.js v22 para el desarrollo del frontend
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
       "version": "22"
     }
   },
+  
+  // Expone los puertos (Go, Vue, PostgreSQL)
   "forwardPorts": [8080, 5173, 5432],
   
-  // Estos comandos se ejecutan en el contenedor 'app' (tu entorno de desarrollo)
+  // Ejecuta comandos de inicialización (solo la primera vez que se crea el Codespace)
   "postCreateCommand": [
-    "cd Backend && go mod tidy",
-    "cd Frontend && npm install"
+    "cd Backend && go mod tidy", // Instala dependencias de Go
+    "cd Frontend && npm install" // Instala dependencias de Node/Vue
   ],
   
+  // Ejecuta comandos de inicio de la aplicación (cada vez que se abre el Codespace)
+  // El uso de 'bash -c' con '&' permite ejecutar ambos servidores en segundo plano
+  "postStartCommand": "bash -c 'go run Backend/main.go & npm run dev --prefix Frontend'",
+
   "customizations": {
     "vscode": {
       "extensions": [
