@@ -3,10 +3,10 @@
   "image": "mcr.microsoft.com/devcontainers/go:1.22",
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
-      "version": "22"              // 👉 instala Node.js 22 + npm
+      "version": "22"
     },
     "ghcr.io/devcontainers/features/postgres:1": {
-      "version": "15",             // 👉 instala y levanta PostgreSQL 15
+      "version": "15",
       "database": "geochat",
       "user": "postgres",
       "password": "postgres"
@@ -17,12 +17,13 @@
   "customizations": {
     "vscode": {
       "extensions": [
-        "golang.Go",               // Soporte para Go
+        "golang.Go",
         "ms-azuretools.vscode-docker",
-        "Vue.volar",               // Soporte para Vue 3
-        "esbenp.prettier-vscode"   // Formateo automático de JS/Vue
+        "Vue.volar",
+        "esbenp.prettier-vscode"
       ]
     }
   },
   "remoteUser": "vscode"
 }
+
