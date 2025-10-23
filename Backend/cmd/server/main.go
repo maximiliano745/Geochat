@@ -10,10 +10,12 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/jackc/pgx/v5"
+
+	// 🚨 IMPORTACIÓN CLAVE: Debes ajustar "GeoChat/Backend" si tu módulo Go tiene otro nombre
+	"Geochat/Backend/internal/location"
 )
 
-// Global DB connection pool variable (Aunque pgx v5 prefiere usar la conexión directamente,
-// usaremos esta variable para simplificar el ejemplo de check-up)
+// Global DB connection pool variable
 var db *pgx.Conn
 
 func main() {
@@ -31,6 +33,10 @@ func main() {
 	router.HandleFunc("/", homeHandler).Methods("GET")
 	router.HandleFunc("/health", healthCheckHandler).Methods("GET")
 
+	// 🟢 REGISTRO DEL HANDLER DE UBICACIÓN
+	// Se pasa la conexión 'db' al handler para que pueda ejecutar las consultas SQL.
+	router.HandleFunc("/v1/location", location.LocationPostHandler(db)).Methods("POST")
+
 	// Middleware de registro simple (opcional pero útil)
 	loggedRouter := loggingMiddleware(router)
 
@@ -43,28 +49,44 @@ func main() {
 	addr := fmt.Sprintf(":%s", port)
 	log.Printf("INFO: Servidor backend Go iniciado en http://localhost%s", addr)
 
-	// El servidor se ejecuta en una goroutine separada para no bloquear
 	err := http.ListenAndServe(addr, loggedRouter)
 	if err != nil {
 		log.Fatalf("FATAL: Error al iniciar el servidor: %v", err)
 	}
 }
 
-// initDB se encarga de configurar y verificar la conexión a PostgreSQL.
+// initDB se encarga de configurar, verificar y CREAR LA TABLA en PostgreSQL.
 func initDB() error {
 	// Usamos el nombre del servicio Docker 'db' como el host de la conexión.
-	// Las credenciales provienen del archivo docker-compose.yml.
 	connStr := "postgresql://postgres:postgres@db:5432/geochat"
-	
-	// Intenta conectar con reintentos. Esto es crucial en Docker Compose,
-	// ya que el servicio 'db' puede tardar un poco más en arrancar que 'app'.
 	maxAttempts := 5
+
 	for i := 0; i < maxAttempts; i++ {
 		conn, err := pgx.Connect(context.Background(), connStr)
 		if err == nil {
 			// Si la conexión fue exitosa, la asignamos a la variable global.
 			db = conn
-			return nil
+
+			// 🟢 1. Verificación y Creación de la Tabla 'user_locations'
+			log.Println("INFO: Verificando/Creando la tabla 'user_locations'...")
+			createTableSQL := `
+			CREATE TABLE IF NOT EXISTS user_locations (
+				id SERIAL PRIMARY KEY,
+				user_id TEXT NOT NULL,
+				latitude DOUBLE PRECISION NOT NULL,
+				longitude DOUBLE PRECISION NOT NULL,
+				created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+			);
+			`
+			// Ejecutamos la creación de la tabla
+			if _, err := conn.Exec(context.Background(), createTableSQL); err != nil {
+				// Si falla la creación de la tabla, cerramos la conexión y reportamos el error.
+				conn.Close(context.Background())
+				return fmt.Errorf("error al crear/verificar la tabla user_locations: %w", err)
+			}
+			log.Println("INFO: La tabla 'user_locations' está lista.")
+
+			return nil // La conexión y la tabla están listas
 		}
 		log.Printf("ADVERTENCIA: Falló el intento %d de conexión a DB: %v. Reintentando en 3 segundos...", i+1, err)
 		time.Sleep(3 * time.Second)
@@ -72,22 +94,19 @@ func initDB() error {
 	return fmt.Errorf("falló la conexión a PostgreSQL después de %d intentos", maxAttempts)
 }
 
-// --- Handlers ---
+// --- Handlers --- (Se mantienen)
 
-// homeHandler responde con un mensaje simple.
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, "Bienvenido a la API de GeoChat. El backend Go está corriendo.")
 }
 
-// healthCheckHandler verifica la conexión a la base de datos.
 func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	if db == nil {
 		http.Error(w, "ERROR: La conexión a la base de datos no está inicializada.", http.StatusInternalServerError)
 		return
 	}
 
-	// Ping a la base de datos para verificar que está viva
 	ctx, cancel := context.WithTimeout(r.Context(), 1*time.Second)
 	defer cancel()
 
@@ -101,13 +120,11 @@ func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Estado: OK. El servidor Go y la DB están operativos.")
 }
 
-// --- Middleware ---
+// --- Middleware --- (Se mantiene)
 
-// loggingMiddleware registra cada solicitud.
 func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Solicitud recibida: %s %s desde %s", r.Method, r.RequestURI, r.RemoteAddr)
-		// Llama al siguiente handler
 		next.ServeHTTP(w, r)
 	})
 }
