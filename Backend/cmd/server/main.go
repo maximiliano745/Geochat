@@ -24,7 +24,7 @@ func main() {
 		log.Fatalf("FATAL: No se pudo inicializar la base de datos: %v", err)
 	}
 	defer db.Close(context.Background())
-	log.Println("INFO: Conexión a PostgreSQL establecida exitosamente.")
+	log.Println("INFO: Conexión a Post establecida exitosamente.")
 
 	// --- 2. Configuración del Router ---
 	router := mux.NewRouter()
