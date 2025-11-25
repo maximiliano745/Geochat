@@ -47,7 +47,7 @@ func main() {
 	}
 
 	addr := fmt.Sprintf(":%s", port)
-	log.Printf("INFO: Servidor backend Go iniciado en http://localhost%s", addr)
+	log.Printf("INFO: Servidor backend Go iniciado en https://localhost%s", addr)
 
 	err := http.ListenAndServe(addr, loggedRouter)
 	if err != nil {
