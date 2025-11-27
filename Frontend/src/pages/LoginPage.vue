@@ -1,82 +1,75 @@
 <template>
   <div class="login-container">
-    <h2>Iniciar Sesión en GeoChat</h2>
+    <h2>Conectar a GeoChat (Web3)</h2>
     
-    <form @submit.prevent="handleLogin">
-      <div class="form-group">
-        <label for="email">Email:</label>
-        <input 
-          type="email" 
-          id="email" 
-          v-model="email" 
-          required
-        />
-      </div>
-      
-      <div class="form-group">
-        <label for="password">Contraseña:</label>
-        <input 
-          type="password" 
-          id="password" 
-          v-model="password" 
-          required
-        />
-      </div>
-      
-      <button type="submit" :disabled="isLoading">
-        {{ isLoading ? 'Cargando...' : 'Ingresar' }}
-      </button>
-      
-      <p v-if="error" class="error-message">{{ error }}</p>
-    </form>
+    <button 
+      @click="connectWallet" 
+      :disabled="isLoading" 
+      class="connect-button"
+    >
+      {{ isLoading ? 'Esperando firma...' : 'Conectar Cartera (MetaMask)' }}
+    </button>
+    
+    <p v-if="error" class="error-message">{{ error }}</p>
+    
+    <p v-if="currentAccount" class="success-message">
+      Conectado como: {{ currentAccount.substring(0, 6) }}...{{ currentAccount.substring(currentAccount.length - 4) }}
+    </p>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-// Importa la función de tu servicio de API (¡debes crear este archivo!)
-import { loginUser } from '../api/authService'; 
+import { ethers } from 'ethers';
+import { authenticateWeb3, getNonce } from '../api/authService'; 
 
-// 1. Estado Local para los Inputs y la Interfaz
-const email = ref('');
-const password = ref('');
 const error = ref(null);
 const isLoading = ref(false);
-
+const currentAccount = ref(''); 
 const router = useRouter();
 
-// 2. Función que maneja el envío del formulario
-const handleLogin = async () => {
-  // Limpiar estados anteriores
+// 1. Función principal para conectar y autenticar
+const connectWallet = async () => {
   error.value = null;
   isLoading.value = true;
   
   try {
-    // 3. Llamar a la API
-    const response = await loginUser(email.value, password.value);
+    // 2. Comprobar si MetaMask está disponible
+    if (!window.ethereum) {
+      error.value = 'MetaMask no está instalado. Por favor, instálalo para continuar.';
+      isLoading.value = false;
+      return;
+    }
     
-    if (response.success && response.token) {
-      // 4. Éxito: Guardar el token de sesión y redirigir
-      localStorage.setItem('authToken', response.token);
-      
-      // Limpia los inputs al terminar
-      email.value = '';
-      password.value = '';
-      
-      // Redirige a la página principal (que es una ruta protegida)
+    // 3. Conectar la cartera y obtener la dirección
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    const accounts = await provider.send('eth_requestAccounts', []);
+    const address = accounts[0]; 
+    currentAccount.value = address;
+    
+    // 4. Obtener un mensaje único (nonce) del servidor
+    const message = await getNonce(address);
+    
+    // 5. Firma del Mensaje
+    const signer = await provider.getSigner(address);
+    const signature = await signer.signMessage(message); 
+
+    // 6. Verificar la firma con el Backend
+    const authResponse = await authenticateWeb3(address, signature, message);
+
+    if (authResponse.success && authResponse.token) {
+      // 7. Éxito: Guardar el token de sesión y redirigir
+      localStorage.setItem('authToken', authResponse.token);
       router.push({ name: 'Home' }); 
-      
     } else {
-      // Manejo de errores de credenciales inválidas (ej: 401 del backend)
-      error.value = response.message || 'Credenciales inválidas. Intenta de nuevo.';
+      error.value = authResponse.message;
     }
     
   } catch (err) {
-    // Manejo de errores de red o servidor
-    error.value = 'Error al conectar con el servidor. Revisa tu conexión.';
+    // Errores de usuario (cancelación de firma) o de red/servidor
+    error.value = err.message || 'Ocurrió un error al conectar o firmar la transacción.';
     console.error(err);
-    
   } finally {
     isLoading.value = false;
   }
@@ -84,44 +77,25 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
-.login-container {
-  max-width: 400px;
-  margin: 50px auto;
-  padding: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-}
-.form-group {
-  margin-bottom: 15px;
-}
-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-input {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-button {
-  width: 100%;
-  padding: 10px;
-  background-color: #42b883; /* Color verde de Vue */
+/* Estilos similares a la versión Web2, pero enfocados en el botón de conexión */
+.connect-button {
+  /* Estilo diferente para destacar la conexión Web3 */
+  background-color: #f6851b; /* Color de MetaMask/Ethereum */
+  padding: 12px 25px;
+  font-size: 1.1em;
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s;
+  margin-top: 20px;
 }
-button:disabled {
-  background-color: #888;
-  cursor: not-allowed;
+.connect-button:hover {
+  background-color: #e5740a;
 }
-.error-message {
-  color: #e53935;
-  margin-top: 10px;
-  text-align: center;
+.success-message {
+    color: #42b883;
+    font-weight: bold;
+    margin-top: 15px;
 }
 </style>
