@@ -1,55 +1,39 @@
-// src/router/index.js
-
 import { createRouter, createWebHistory } from 'vue-router';
+import LoginPage from '../pages/LoginPage.vue'; // Importa el componente de Login
+import HomePage from '../pages/HomePage.vue'; // Asegúrate de que este componente exista
 
-// 1. Importa tus componentes (asumiendo que están en src/views o src/pages)
-import LoginPage from '../pages/LoginPage.vue'; 
-import HomePage from '../pages/HomePage.vue';
-import NotFoundPage from '../pages/NotFoundPage.vue';
-
-// 2. Define las rutas
 const routes = [
-  // Ruta de Login (Pública)
-  {
-    path: '/login',
-    name: 'Login',
-    component: LoginPage,
-    meta: { requiresAuth: false } // No requiere autenticación
-  },
-  
-  // Ruta Principal (Protegida)
   {
     path: '/',
-    name: 'Home',
-    component: HomePage,
-    meta: { requiresAuth: true } // REQUIERE autenticación
+    name: 'Login',
+    component: LoginPage,
   },
-
-  // Ruta 404 (Catch-all)
   {
-    path: '/:catchAll(.*)',
-    name: 'NotFound',
-    component: NotFoundPage,
+    path: '/home',
+    name: 'Home',
+    component: HomePage, // Usamos HomePage para el componente principal
+    meta: { requiresAuth: true } // REQUIERE AUTENTICACIÓN
   }
 ];
 
-// 3. Crea la instancia del router
 const router = createRouter({
-  history: createWebHistory(), // Usa el historial de navegación HTML5 (URLs limpias)
+  history: createWebHistory(),
   routes,
 });
 
-// 4. Implementa el "Guarda de Navegación" (Navigation Guard)
+// Guardia de navegación global para verificar la autenticación
 router.beforeEach((to, from, next) => {
-  // Obtiene el estado de autenticación (ej: token guardado)
-  const isAuthenticated = localStorage.getItem('authToken'); 
-  
-  // Si la ruta requiere autenticación Y el usuario NO está autenticado
-  if (to.meta.requiresAuth && !isAuthenticated) {
-    // Redirige al usuario a la página de login
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth);
+  const isAuthenticated = localStorage.getItem('authToken');
+
+  if (requiresAuth && !isAuthenticated) {
+    // Si se requiere auth y no está autenticado, redirigir a login
     next({ name: 'Login' });
+  } else if (!requiresAuth && isAuthenticated) {
+    // Si está en login/registro y ya está autenticado, redirigir a home
+    next({ name: 'Home' });
   } else {
-    // Permite el acceso a la ruta
+    // Continuar normalmente
     next();
   }
 });

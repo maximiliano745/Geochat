@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoChat Web3</title>
+    
+    <!-- Carga de Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Configuración del font Inter (opcional, pero mejora la estética) -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+
+    <!-- Carga de Leaflet CSS (necesario para el mapa) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5aTMq/nCEY="
+        crossorigin=""/>
+</head>
+<body class="bg-gray-100">
+    <!-- Contenedor donde se montará la aplicación Vue -->
+    <div id="app"></div>
+
+    <!-- Carga de Leaflet JS (necesario para el mapa) -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20n6n3hLg3uU7/zY+C2D7y27n+yJ33+u9Zk+nQx3eQ="
+        crossorigin=""></script>
+
+    <!-- Punto de entrada del script de Vue, crucial para que funcione 'import' -->
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>

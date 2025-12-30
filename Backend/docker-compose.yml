@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  # Servicio de Base de Datos PostgreSQL
+  db:
+    image: postgres:16-alpine
+    container_name: geochat-postgres
+    restart: always
+    environment:
+      # Los valores deben coincidir con la cadena de conexión en main.go
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: geochat
+    # Mapeo del puerto de la DB al host (Opcional, pero útil para acceso externo)
+    ports:
+      - "5432:5432"
+    # Persistencia de datos
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+
+  # Servicio de Backend Go (Gin)
+  backend:
+    # 🚨 NOTA: Esto asume que tienes un Dockerfile en la carpeta 'Backend/'
+    # Si tu 'main.go' no está en la raíz de 'Backend/', ajusta el contexto y el Dockerfile.
+    build:
+      context: ./Backend # Busca el Dockerfile dentro de la carpeta Backend
+      dockerfile: Dockerfile
+    container_name: geochat-backend
+    # Mapeo del puerto del servidor Go (8080 en main.go)
+    ports:
+      - "8080:8080"
+    # Asegura que la DB esté lista antes de intentar iniciar el backend
+    depends_on:
+      - db
+    # Reiniciar automáticamente si el servicio falla
+    restart: on-failure
+    # Opcional: Si necesitas ver logs de la DB en el inicio del backend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  # 🟢 Servicio de Frontend Vue (Nginx)
+  frontend:
+    # Usa el Dockerfile que se encuentra en la carpeta Frontend
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: geochat-frontend
+    # El puerto 80 del contenedor Nginx se mapea al 5174 del host
+    ports:
+      - "5174:80"
+    # El frontend depende del backend (aunque Nginx solo sirve estáticos, es buena práctica)
+    depends_on:
+      - backend
+    restart: on-failure
+
+volumes:
+  postgres_data:
+    driver: local
