@@ -4,10 +4,11 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"Geochat/Backend/internal/services" // <-- ¡IMPORTANTE! Cambia esto al nombre de tu módulo
+	"Geochat/Backend/internal/services" // CORREGIDO: Usando ruta completa del módulo para servicios
 )
 
 // RequestNonce maneja la solicitud GET para obtener el mensaje a firmar.
+// Ruta: GET /v1/auth/nonce?address=...
 func RequestNonce(c *gin.Context) {
 	address := c.Query("address") 
 	if address == "" {
@@ -17,10 +18,12 @@ func RequestNonce(c *gin.Context) {
 
 	nonceMessage := services.GenerateNonce(address)
 	
+	// Devuelve el mensaje al cliente.
 	c.JSON(http.StatusOK, gin.H{"success": true, "message": nonceMessage})
 }
 
 // VerifyAndAuthenticate maneja la solicitud POST para verificar la firma.
+// Ruta: POST /v1/auth/verify
 func VerifyAndAuthenticate(c *gin.Context) {
 	var req struct {
 		Address   string `json:"address"`
