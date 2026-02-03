@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "jsx": "react-jsx", // Esto soluciona el error del jsx-runtime
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"]
+  }
+}
