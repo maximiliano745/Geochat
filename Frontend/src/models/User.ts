@@ -6,11 +6,12 @@ export interface EnergyVault {
 }
 
 export interface User {
-  id: string;           // ID interno o público
-  did: string;          // Decentralized Identifier (Sovereign Identity)
-  name: string;
-  energyVault: EnergyVault; // Aquí conectamos con tu interfaz anterior
-  // Nota: No incluimos la clave privada aquí por seguridad
-
-  isTeslaModeActive?: boolean; // El usuario lo activa manualmente
+    id: string;
+    name: string;
+    did: string;
+    energyVault: {
+        accumulatedPE: number;
+        locationDID: string;
+    };
+    isTeslaModeActive?: boolean; // El usuario lo activa manualmente
 }

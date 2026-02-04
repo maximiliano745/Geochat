@@ -1,17 +1,15 @@
 import { createApp } from 'vue';
-// Importa el componente raíz (App.vue)
 import App from './App.vue'; 
-// Importa el sistema de rutas configurado (asumiendo src/router/index.js)
 import router from './router/index.js'; 
 
-// NOTA: Si necesitas estilos globales que no sean Tailwind, puedes descomentar la siguiente línea:
-// import './style.css'; 
+// 1. Importamos la lógica del laboratorio (main.ts)
+// Al importarlo así, el código dentro de main.ts se ejecuta automáticamente
+import './main.ts'; 
 
-// --- Inicialización de la Aplicación ---
-createApp(App)
-    // Conecta el sistema de rutas
-    .use(router)
-    // Monta la aplicación en el elemento con id="app"
-    .mount('#app');
+// 2. Creamos y montamos la aplicación UNA sola vez
+const app = createApp(App);
 
-console.log("GeoChat Vue App: Inicialización completa.");
+app.use(router);
+app.mount('#app');
+
+console.log("🚀 GeoChat Vue App: Inicialización completa y Laboratorio activo.");
